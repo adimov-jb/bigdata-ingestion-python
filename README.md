@@ -14,6 +14,9 @@ extract ───>│  sources/<outra>     │──> pipeline.py ──> writer
 | Fonte | Tabela | Descrição |
 |---|---|---|
 | `open_meteo` | `bronze.open_meteo_weather_hourly` | Tempo horário de 10 capitais brasileiras na [Open-Meteo](https://open-meteo.com/), uma API gratuita e sem chave |
+| `open_meteo_locations` | `bronze.open_meteo_locations` | Snapshot diário das cidades monitoradas, com UF, região e coordenadas. Não chama a API |
+
+A lista de cidades fica só em `src/ingestion/sources/open_meteo/config.py`. Para incluir uma cidade, adicione-a ali, com UF e região. O dbt monta a `dim_city` a partir de `open_meteo_locations`, então não há outra lista para atualizar.
 
 `ingestion list` mostra as fontes registradas na imagem.
 
@@ -93,7 +96,7 @@ O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo P
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | `test` | vêm da role da task ECS |
 | `TRINO_HOST` / `TRINO_PORT` | `trino` / `8080` | não usado |
 
-Os valores locais estão em `.env.local`, que é versionado porque não contém segredos.
+Localmente, todas vêm de `platform/local.env`, gerado pelo `terraform apply` do repositório `bigdata-terraform`. O `docker-compose.yml` carrega esse arquivo, então este repositório não guarda cópia desses valores. Sem ele, o `run` falha com uma mensagem que explica como gerá-lo.
 
 ## Estrutura
 

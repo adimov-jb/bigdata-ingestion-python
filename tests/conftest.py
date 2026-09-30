@@ -8,8 +8,8 @@ from ingestion.source import Column, Source
 from ingestion.sources.open_meteo.config import HOURLY_VARIABLES, Location
 
 LOCATIONS = (
-    Location("Cidade A", -10.0, -40.0),
-    Location("Cidade B", -20.0, -50.0),
+    Location("Cidade A", "AA", "Norte", -10.0, -40.0),
+    Location("Cidade B", "BB", "Sul", -20.0, -50.0),
 )
 
 BUCKET = "bronze-test"

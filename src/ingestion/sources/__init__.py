@@ -7,7 +7,7 @@ e inclua-o em `_ALL` abaixo.
 from ingestion.source import Source
 from ingestion.sources import open_meteo
 
-_ALL: tuple[Source, ...] = (open_meteo.SOURCE,)
+_ALL: tuple[Source, ...] = (open_meteo.SOURCE, open_meteo.LOCATIONS_SOURCE)
 
 SOURCES: dict[str, Source] = {source.name: source for source in _ALL}
 
