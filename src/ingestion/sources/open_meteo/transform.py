@@ -10,8 +10,23 @@ from ingestion.sources.open_meteo.config import (
     FLOAT_VARIABLES,
     HOURLY_VARIABLES,
     INT_VARIABLES,
+    LOCATION_COLUMNS,
     Location,
 )
+
+
+def locations_dataframe(locations: Sequence[Location]) -> pd.DataFrame:
+    """Uma linha por localidade monitorada."""
+    df = pd.DataFrame(
+        {
+            "city": [loc.name for loc in locations],
+            "state": [loc.state for loc in locations],
+            "region": [loc.region for loc in locations],
+            "latitude": [float(loc.latitude) for loc in locations],
+            "longitude": [float(loc.longitude) for loc in locations],
+        }
+    )
+    return df[[column.name for column in LOCATION_COLUMNS]]
 
 
 def to_dataframe(payload: Sequence[dict], locations: Sequence[Location], day: date) -> pd.DataFrame:

@@ -18,8 +18,15 @@ def fake_sources(monkeypatch):
     return calls
 
 
-def test_open_meteo_is_registered():
-    assert "open_meteo" in SOURCES
+def test_open_meteo_sources_are_registered():
+    assert {"open_meteo", "open_meteo_locations"} <= set(SOURCES)
+
+
+def test_missing_platform_env_has_actionable_error(monkeypatch):
+    monkeypatch.delenv("BRONZE_BUCKET", raising=False)
+
+    with pytest.raises(RuntimeError, match="platform/local.env"):
+        cli.main(["run", "open_meteo"])
 
 
 def test_run_without_sources_runs_all(fake_sources):
