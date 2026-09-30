@@ -5,10 +5,9 @@ from collections.abc import Sequence
 from datetime import UTC, date, datetime
 
 import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
-from ingestion.config import HOURLY_VARIABLES, Location
+from ingestion.http import REQUEST_TIMEOUT_SECONDS, build_session
+from ingestion.sources.open_meteo.config import HOURLY_VARIABLES, Location
 
 log = logging.getLogger(__name__)
 
@@ -18,19 +17,6 @@ ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
 # A API de arquivo (reanálise ERA5) tem alguns dias de atraso; datas recentes
 # vêm da API de previsão, que também devolve dias passados.
 FORECAST_MAX_PAST_DAYS = 60
-REQUEST_TIMEOUT_SECONDS = 30
-
-
-def build_session() -> requests.Session:
-    retry = Retry(
-        total=5,
-        backoff_factor=1,
-        status_forcelist=(429, 500, 502, 503, 504),
-        allowed_methods=("GET",),
-    )
-    session = requests.Session()
-    session.mount("https://", HTTPAdapter(max_retries=retry))
-    return session
 
 
 def endpoint_for(day: date, today: date) -> str:
