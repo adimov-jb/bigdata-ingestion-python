@@ -1,29 +1,20 @@
 """Converte a resposta da API em um DataFrame com schema fixo."""
 
 from collections.abc import Sequence
-from datetime import date, datetime
+from datetime import date
 
 import pandas as pd
 
-from ingestion.config import FLOAT_VARIABLES, HOURLY_VARIABLES, INT_VARIABLES, Location
-
-COLUMNS: tuple[str, ...] = (
-    "city",
-    "latitude",
-    "longitude",
-    "observed_at",
-    *HOURLY_VARIABLES,
-    "ingested_at",
-    "dt",
+from ingestion.sources.open_meteo.config import (
+    COLUMNS,
+    FLOAT_VARIABLES,
+    HOURLY_VARIABLES,
+    INT_VARIABLES,
+    Location,
 )
 
 
-def to_dataframe(
-    payload: Sequence[dict],
-    locations: Sequence[Location],
-    day: date,
-    ingested_at: datetime,
-) -> pd.DataFrame:
+def to_dataframe(payload: Sequence[dict], locations: Sequence[Location], day: date) -> pd.DataFrame:
     """Uma linha por cidade e hora. Timestamps em UTC, sem timezone."""
     frames = []
     for location, item in zip(locations, payload, strict=True):
@@ -45,6 +36,4 @@ def to_dataframe(
     df["observed_at"] = pd.to_datetime(df.pop("time"))
     df = df.astype({col: "float64" for col in FLOAT_VARIABLES})
     df = df.astype({col: "Int64" for col in INT_VARIABLES})
-    df["ingested_at"] = pd.Timestamp(ingested_at).tz_localize(None)
-    df["dt"] = day.isoformat()
-    return df[list(COLUMNS)]
+    return df[[column.name for column in COLUMNS]]

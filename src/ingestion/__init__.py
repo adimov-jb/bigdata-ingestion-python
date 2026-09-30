@@ -1,1 +1,1 @@
-"""Ingestão da API Open-Meteo para a camada bronze."""
+"""Ingestão de fontes externas para a camada bronze."""

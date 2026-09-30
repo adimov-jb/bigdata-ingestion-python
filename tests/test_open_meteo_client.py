@@ -6,7 +6,12 @@ import responses
 from conftest import api_item
 from responses import matchers
 
-from ingestion.client import ARCHIVE_URL, FORECAST_URL, endpoint_for, fetch_hourly
+from ingestion.sources.open_meteo.client import (
+    ARCHIVE_URL,
+    FORECAST_URL,
+    endpoint_for,
+    fetch_hourly,
+)
 
 TODAY = date(2026, 9, 30)
 
