@@ -32,6 +32,10 @@ A lista de cidades fica só em `src/ingestion/sources/open_meteo/config.py`. Par
 
 A plataforma local do repositório `bigdata-terraform` precisa estar no ar (`docker compose up -d` e `terraform apply` lá).
 
+O jeito mais simples de subir e operar os quatro repositórios juntos é o `scripts/platform.sh` do repositório `bigdata-terraform` (`up`, `build`, `status` e `reset`). Problemas comuns e como resolvê-los estão no [RUNBOOK](https://github.com/adimov-jb/bigdata-terraform/blob/main/RUNBOOK.md).
+
+O `scripts/platform.sh build` grava o commit deste repositório na imagem (label `org.opencontainers.image.revision`), e toda execução registra esse commit na primeira linha do log. Um `docker compose build` direto grava `dev`.
+
 ```bash
 # Build da imagem (bigdata-ingestion:local)
 docker compose build ingestion
@@ -113,4 +117,9 @@ src/ingestion/
     __init__.py   registro das fontes
     open_meteo/   config, client, transform e SOURCE
 tests/            pytest (HTTP mockado com responses, S3 mockado com moto)
+requirements.lock       versões exatas de todas as dependências da imagem
+requirements-dev.lock   idem, com as ferramentas de teste
+scripts/lock.sh         regenera os dois .lock a partir do pyproject.toml
 ```
+
+O `pyproject.toml` define só os limites de versão. As imagens instalam os `.lock`, então builds feitos em dias diferentes geram a mesma imagem. Para atualizar as dependências, rode `scripts/lock.sh`, revise o diff e rode os testes.

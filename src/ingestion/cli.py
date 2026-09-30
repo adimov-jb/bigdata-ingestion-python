@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import os
 from datetime import UTC, date, datetime, timedelta
 
 from ingestion.catalog import register_local
@@ -67,6 +68,8 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     parser = build_parser()
     args = parser.parse_args(argv)
+    # Primeira linha do log de toda execução: identifica o código que rodou.
+    log.info("bigdata-ingestion commit %s", os.getenv("BIGDATA_VERSION", "dev"))
 
     if args.command == "list":
         for source in SOURCES.values():

@@ -66,3 +66,12 @@ def test_list_does_not_need_environment(monkeypatch, fake_sources, capsys):
 
     assert cli.main(["list"]) == 0
     assert "alpha" in capsys.readouterr().out
+
+
+def test_every_run_logs_the_image_commit(monkeypatch, fake_sources, caplog):
+    monkeypatch.setenv("BIGDATA_VERSION", "abc1234")
+
+    with caplog.at_level("INFO", logger="ingestion"):
+        cli.main(["run", "alpha", "--date", "2026-09-29"])
+
+    assert "bigdata-ingestion commit abc1234" in caplog.text
