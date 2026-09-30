@@ -7,6 +7,9 @@ services:
     build:
       context: .
       target: runtime
+      args:
+        # Commit gravado na imagem; scripts/platform.sh do repositório Terraform preenche.
+        GIT_SHA: ${GIT_SHA:-dev}
     # Nome fixo: o Airflow local executa esta imagem via DockerOperator.
     image: bigdata-ingestion:local
     # Buckets, LocalStack e Trino vêm do contrato da plataforma, sem cópia local.
