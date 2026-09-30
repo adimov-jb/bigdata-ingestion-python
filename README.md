@@ -14,6 +14,9 @@ extract ───>│  sources/<outra>     │──> pipeline.py ──> writer
 | Fonte | Tabela | Descrição |
 |---|---|---|
 | `open_meteo` | `bronze.open_meteo_weather_hourly` | Tempo horário de 10 capitais brasileiras na [Open-Meteo](https://open-meteo.com/), uma API gratuita e sem chave |
+| `rest_countries` | `bronze.rest_countries` | Snapshot diário dos países e territórios da [Rest Countries v5](https://restcountries.com/docs/countries): códigos ISO, população, área, capital, moedas, idiomas e fusos. **Exige chave de API** (veja abaixo) |
+| `world_bank_indicators` | `bronze.world_bank_indicators` | Snapshot diário da série desde 2000 de indicadores do [Banco Mundial](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392): PIB, inflação, expectativa de vida, pobreza e população. Formato longo: país × indicador × ano |
+| `world_bank_countries` | `bronze.world_bank_countries` | Países e agregados do Banco Mundial, com região, faixa de renda e `is_aggregate` para separar regiões e faixas de renda dos países |
 | `open_meteo_locations` | `bronze.open_meteo_locations` | Snapshot diário das cidades monitoradas, com UF, região e coordenadas. Não chama a API |
 
 A lista de cidades fica só em `src/ingestion/sources/open_meteo/config.py`. Para incluir uma cidade, adicione-a ali, com UF e região. O dbt monta a `dim_city` a partir de `open_meteo_locations`, então não há outra lista para atualizar.
@@ -84,6 +87,10 @@ docker compose -f ../Terraform/docker-compose.yml exec trino trino \
 4. Escreva os testes em `tests/test_<nome>_*.py`, com HTTP mockado via `responses`.
 
 Credenciais específicas de uma fonte, como uma API key, devem ser lidas de variáveis de ambiente dentro do `extract`, e não em import. Assim uma chave ausente derruba só aquela fonte.
+
+**Chaves de API no ambiente local:** ficam em `platform/secrets.env`, no repositório `bigdata-terraform`. Esse arquivo é criado a partir de `platform/secrets.env.example` e não entra no git. O `docker-compose.yml` o carrega, e o Airflow repassa cada chave só para a task da fonte que a usa, sem mostrá-la nos logs. Na AWS, as chaves ficam no Secrets Manager. Hoje só a `rest_countries` usa chave (`REST_COUNTRIES_API_KEY`, plano gratuito em restcountries.com/sign-up).
+
+**APIs que respondem erro com HTTP 200:** a Rest Countries (inclusive a v3.1 descontinuada) e o Banco Mundial devolvem erros com status 200. Os clientes conferem o formato da resposta e falham com a mensagem da API, em vez de gravar o erro como se fosse dado.
 
 Se o schema de uma fonte mudar, `register-local` não altera uma tabela que já existe (`CREATE TABLE IF NOT EXISTS`). Nesse caso, faça `DROP TABLE hive.bronze.<tabela>` antes. A tabela é externa, então os dados no S3 são preservados.
 

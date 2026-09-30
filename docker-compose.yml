@@ -16,6 +16,9 @@ services:
     env_file:
       - path: ${BIGDATA_PLATFORM_DIR:-../Terraform/platform}/local.env
         required: false
+      # Chaves de API (fora do git); modelo em platform/secrets.env.example.
+      - path: ${BIGDATA_PLATFORM_DIR:-../Terraform/platform}/secrets.env
+        required: false
     networks: [bigdata]
 
   tests:
