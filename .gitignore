@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Variáveis de ambiente com segredos; .env.local (LocalStack) é versionado de propósito.
+.env
+.env.*
+!.env.local
+
+.DS_Store
+.idea/
+.vscode/

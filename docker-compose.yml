@@ -1,0 +1,23 @@
+# Requer a plataforma local do repositório Terraform no ar (rede "bigdata").
+name: bigdata-ingestion
+
+services:
+  ingestion:
+    build:
+      context: .
+      target: runtime
+    # Nome fixo: o Airflow local executa esta imagem via DockerOperator.
+    image: bigdata-ingestion:local
+    env_file: .env.local
+    networks: [bigdata]
+
+  tests:
+    build:
+      context: .
+      target: test
+    profiles: ["tools"]
+    network_mode: none
+
+networks:
+  bigdata:
+    external: true
