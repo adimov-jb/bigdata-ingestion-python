@@ -85,7 +85,7 @@ Se o schema de uma fonte mudar, `register-local` não altera uma tabela que já 
 
 ## CI
 
-O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo PR e em todo push para a `main`, com o mesmo comando de testes da seção anterior. A `main` é protegida: só recebe mudanças por PR, e o check `testes` precisa passar antes do merge.
+O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo PR e em todo push para a `main`, com o mesmo comando de testes da seção anterior.
 
 ## Variáveis de ambiente
 
