@@ -1,6 +1,28 @@
-# Ingestão Python → bronze
+# bigdata-ingestion-python — ingestão das fontes para a bronze
 
-Ingere fontes externas para a camada bronze do S3 em Parquet particionado por dia. Cada fonte é um módulo independente em `src/ingestion/sources/`. O núcleo é comum a todas e cuida da validação de schema, dos metadados, da gravação, do catálogo e do CLI.
+Framework de ingestão de várias fontes para a camada bronze do data lake. Hoje são cinco fontes de três APIs: Open-Meteo (clima), Rest Countries v5 (países) e Banco Mundial (indicadores socioeconômicos). Tudo é gravado em Parquet particionado por dia no S3.
+
+Cada fonte é um módulo independente em `src/ingestion/sources/` e roda isolada: a falha de uma não afeta as outras. O núcleo é comum a todas e cuida da validação de schema, dos metadados (`ingested_at`, `dt`), da gravação idempotente, do registro no catálogo e do CLI.
+
+## A plataforma
+
+Este repositório é uma das quatro partes da plataforma de dados **bigdata**. Ela coleta dados públicos de APIs, organiza tudo num data lake em camadas (bronze → silver → gold) e entrega tabelas analíticas validadas. Tudo roda localmente em Docker, com LocalStack, Hive Metastore e Trino no lugar de S3, Glue e Athena, e está preparado para a AWS.
+
+| Repositório | Papel |
+|---|---|
+| [bigdata-terraform](https://github.com/adimov-jb/bigdata-terraform) | Infraestrutura (AWS e local), contrato da plataforma, operação (`scripts/platform.sh`) e runbook |
+| **bigdata-ingestion-python** (este) | Ingestão das APIs para a camada bronze (Parquet no S3) |
+| [bigdata-dbt-modeling](https://github.com/adimov-jb/bigdata-dbt-modeling) | Camadas silver e gold (Iceberg), relacionamento entre fontes e validação de qualidade |
+| [bigdata-airflow-dags](https://github.com/adimov-jb/bigdata-airflow-dags) | Orquestração diária, alertas por e-mail e monitoramento de freshness |
+
+| Domínio | Fontes | Principais tabelas na gold |
+|---|---|---|
+| Clima | [Open-Meteo](https://open-meteo.com/): tempo horário de 10 capitais brasileiras | `fct_weather_daily`, `dim_city` |
+| Países | [Rest Countries v5](https://restcountries.com/) e [Banco Mundial](https://data.worldbank.org/): atributos dos países e indicadores socioeconômicos (PIB, inflação, expectativa de vida, pobreza, população) | `dim_country`, `fct_country_indicators_yearly`, `dq_indicator_coverage` |
+
+Para subir e operar tudo junto, use o `scripts/platform.sh up` do repositório `bigdata-terraform`. Os problemas conhecidos estão no [RUNBOOK](https://github.com/adimov-jb/bigdata-terraform/blob/main/RUNBOOK.md).
+
+## Arquitetura
 
 ```
             ┌─ sources/open_meteo ─┐
@@ -106,6 +128,7 @@ O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo P
 | `AWS_ENDPOINT_URL` | `http://localstack:4566` | não definir |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | `test` | vêm da role da task ECS |
 | `TRINO_HOST` / `TRINO_PORT` | `trino` / `8080` | não usado |
+| `REST_COUNTRIES_API_KEY` | `platform/secrets.env` (fora do git) | Secrets Manager |
 
 Localmente, todas vêm de `platform/local.env`, gerado pelo `terraform apply` do repositório `bigdata-terraform`. O `docker-compose.yml` carrega esse arquivo, então este repositório não guarda cópia desses valores. Sem ele, o `run` falha com uma mensagem que explica como gerá-lo.
 
